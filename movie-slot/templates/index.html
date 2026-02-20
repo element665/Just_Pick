@@ -53,14 +53,14 @@ body {
         0 0 25px var(--glow),
         inset 0 0 20px rgba(0,0,0,0.8);
     width: 100%;
-    max-width: 420px;
+    max-width: 700px;
     padding: 20px;
 }
 
 /* ---------- HEADERS ---------- */
 h1 {
     text-align: center;
-    font-size: 18px;
+    font-size: 26px;
     letter-spacing: 2px;
     margin-bottom: 8px;
     text-shadow: 0 0 6px var(--glow);
@@ -68,7 +68,7 @@ h1 {
 
 h2 {
     text-align: center;
-    font-size: 12px;
+    font-size: 14px;
     color: var(--muted);
     letter-spacing: 2px;
     margin-bottom: 20px;
@@ -88,13 +88,8 @@ h2 {
     align-items: center;
     gap: 8px;
     border: 2px solid #222;
-    padding: 10px;
-    margin-bottom: 10px;
-    font-size: 14px;
-}
-
-.slot:last-child {
-    margin-bottom: 0;
+    padding: 14px 16px;
+    font-size: 18px;
 }
 
 .slot.locked {
@@ -102,21 +97,11 @@ h2 {
     box-shadow: inset 0 0 10px rgba(255,61,129,0.5);
 }
 
-.slot-number {
-    color: var(--muted);
-    width: 28px;
-}
-
 .slot-title {
     flex: 1;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-}
-
-.slot-lock {
-    width: 32px;
-    text-align: center;
 }
 
 /* ---------- BUTTONS ---------- */
@@ -170,10 +155,115 @@ button:hover {
     margin-top: 14px;
 }
 
+/* ---------- SLOT WRAPPER ---------- */
+.slot-wrapper {
+    margin-bottom: 10px;
+}
+
+.slot-wrapper:last-child .slot {
+    margin-bottom: 0;
+}
+
+.slot-wrapper .slot {
+    margin-bottom: 0;
+    cursor: default;
+}
+
+.slot-title {
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.slot-title:hover {
+    color: var(--border);
+}
+
+.slot-title.active {
+    color: var(--border);
+}
+
+/* ---------- INFO PANEL ---------- */
+.info-panel {
+    display: none;
+    background: #0a0a0a;
+    border: 2px solid #333;
+    border-top: none;
+    padding: 14px;
+    gap: 14px;
+}
+
+.info-panel.open {
+    display: flex;
+}
+
+.info-poster {
+    width: 80px;
+    min-width: 80px;
+    height: 120px;
+    object-fit: cover;
+    border: 2px solid #333;
+}
+
+.info-poster-placeholder {
+    width: 80px;
+    min-width: 80px;
+    height: 120px;
+    background: #1a1a1a;
+    border: 2px solid #333;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--muted);
+    font-size: 10px;
+    text-align: center;
+}
+
+.info-details {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 12px;
+    overflow: hidden;
+}
+
+.info-rating {
+    color: var(--border);
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.info-genre {
+    color: var(--muted);
+    font-size: 11px;
+    letter-spacing: 1px;
+}
+
+.info-plot {
+    color: var(--text);
+    font-size: 12px;
+    line-height: 1.5;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+}
+
+.info-loading {
+    color: var(--muted);
+    font-size: 12px;
+    padding: 10px 0;
+}
+
+.info-error {
+    color: var(--accent);
+    font-size: 12px;
+    padding: 10px 0;
+}
+
 /* ---------- DESKTOP SCALE ---------- */
 @media (min-width: 600px) {
-    h1 { font-size: 20px; }
-    .slot { font-size: 15px; }
+    h1 { font-size: 28px; }
+    .slot { font-size: 20px; }
 }
 </style>
 </head>
@@ -181,29 +271,32 @@ button:hover {
 <body>
 
 <div class="machine">
-    <h1>RETRO MOVIE SLOT MACHINE</h1>
+    <h1>JUST PICK - MOVIE MACHINE</h1>
     <h2>NOW PLAYING</h2>
 
 <div class="screen">
     {% for i in range(3) %}
-        <div class="slot {% if locked[i] %}locked{% endif %}">
-            <div class="slot-number">[{{ i + 1 }}]</div>
+        <div class="slot-wrapper">
+            <div class="slot {% if locked[i] %}locked{% endif %}">
+                <div class="slot-title" onclick="toggleInfo(this, '{{ slots[i] }}')">
+                    {{ slots[i] or "—" }}
+                </div>
 
-            <div class="slot-title">
-                {{ slots[i] or "—" }}
+                <form method="post">
+                    {% if locked[i] %}
+                        <button class="toggle-btn" name="action" value="toggle{{ i }}">
+                            UNLOCK 🔓
+                        </button>
+                    {% else %}
+                        <button class="toggle-btn" name="action" value="toggle{{ i }}">
+                            LOCK 🔒
+                        </button>
+                    {% endif %}
+                </form>
             </div>
-
-            <form method="post">
-                {% if locked[i] %}
-                    <button class="toggle-btn" name="action" value="toggle{{ i }}">
-                        UNLOCK 🔓
-                    </button>
-                {% else %}
-                    <button class="toggle-btn" name="action" value="toggle{{ i }}">
-                        LOCK 🔒
-                    </button>
-                {% endif %}
-            </form>
+            <div class="info-panel" id="info-{{ i }}">
+                <div class="info-loading">LOADING...</div>
+            </div>
         </div>
     {% endfor %}
 </div>
@@ -216,9 +309,93 @@ button:hover {
 
 
     <div class="hint">
-        LOCKED SLOTS STAY • CLEAR TO REROLL
+        LOCKED SLOTS STAY • CLEAR TO REROLL • CLICK TITLE FOR INFO
     </div>
 </div>
+
+<script>
+    const OMDB_API_KEY = "{{ omdb_api_key }}";
+    const cache = {};
+
+    function toggleInfo(titleEl, rawTitle) {
+        if (!rawTitle || rawTitle === "—") return;
+
+        const wrapper = titleEl.closest(".slot-wrapper");
+        const panel = wrapper.querySelector(".info-panel");
+        const isOpen = panel.classList.contains("open");
+
+        // Close all panels first
+        document.querySelectorAll(".info-panel").forEach(p => p.classList.remove("open"));
+        document.querySelectorAll(".slot-title").forEach(t => t.classList.remove("active"));
+
+        if (isOpen) return; // toggle off if already open
+
+        panel.classList.add("open");
+        titleEl.classList.add("active");
+        fetchMovieInfo(rawTitle, panel);
+    }
+
+    async function fetchMovieInfo(rawTitle, panel) {
+        // Strip year from title e.g. "Jaws (1975)" -> "Jaws", year -> "1975"
+        const match = rawTitle.match(/^(.+?)\s*\((\d{4})\)$/);
+        const title = match ? match[1].trim() : rawTitle;
+        const year = match ? match[2] : "";
+
+        const cacheKey = rawTitle;
+        if (cache[cacheKey]) {
+            renderInfo(cache[cacheKey], panel);
+            return;
+        }
+
+        panel.innerHTML = `<div class="info-loading">LOADING...</div>`;
+
+        try {
+            const params = new URLSearchParams({ apikey: OMDB_API_KEY, t: title, type: "movie" });
+            if (year) params.append("y", year);
+
+            const res = await fetch(`https://www.omdbapi.com/?${params}`);
+            const data = await res.json();
+
+            if (data.Response === "False") {
+                panel.innerHTML = `<div class="info-error">NO DATA FOUND</div>`;
+                return;
+            }
+
+            cache[cacheKey] = data;
+            renderInfo(data, panel);
+        } catch (e) {
+            panel.innerHTML = `<div class="info-error">FETCH ERROR</div>`;
+        }
+    }
+
+    function renderInfo(data, panel) {
+        const hasPoster = data.Poster && data.Poster !== "N/A";
+        const posterHTML = hasPoster
+            ? `<img class="info-poster" src="${data.Poster}" alt="Poster">`
+            : `<div class="info-poster-placeholder">NO POSTER</div>`;
+
+        const rating = data.imdbRating && data.imdbRating !== "N/A"
+            ? `<div class="info-rating">★ ${data.imdbRating} / 10</div>`
+            : "";
+
+        const genre = data.Genre && data.Genre !== "N/A"
+            ? `<div class="info-genre">${data.Genre.toUpperCase()}</div>`
+            : "";
+
+        const plot = data.Plot && data.Plot !== "N/A"
+            ? `<div class="info-plot">${data.Plot}</div>`
+            : "";
+
+        panel.innerHTML = `
+            ${posterHTML}
+            <div class="info-details">
+                ${rating}
+                ${genre}
+                ${plot}
+            </div>
+        `;
+    }
+</script>
 
 </body>
 </html>
