@@ -34,8 +34,10 @@ def spin_slots():
     for i in range(SLOT_COUNT):
         if locked[i]:
             continue
-
         final = spin_slot(movies, used_movies)
+        if final is None:
+            used_movies.clear()  # reset and start over
+            final = spin_slot(movies, used_movies)
         if final:
             used_movies.add(final)
             slots[i] = final
