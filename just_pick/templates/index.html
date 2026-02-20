@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Retro Movie Slot Machine</title>
+
+<style>
+/* ---------- RESET ---------- */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+/* ---------- COLOR PALETTE ---------- */
+:root {
+    --bg: #050505;
+    --cabinet: #111;
+    --screen: #000;
+    --border: #f5c542;
+    --accent: #ff3d81;
+    --text: #eaeaea;
+    --muted: #8a8a8a;
+    --glow: rgba(245, 197, 66, 0.6);
+}
+
+/* ---------- BODY ---------- */
+body {
+    min-height: 100vh;
+    background:
+        radial-gradient(circle at top, #1a1a1a, var(--bg)),
+        repeating-linear-gradient(
+            to bottom,
+            rgba(255,255,255,0.02),
+            rgba(255,255,255,0.02) 1px,
+            transparent 1px,
+            transparent 3px
+        );
+    font-family: "Courier New", monospace;
+    color: var(--text);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 16px;
+}
+
+/* ---------- CABINET ---------- */
+.machine {
+    background: var(--cabinet);
+    border: 4px solid var(--border);
+    box-shadow:
+        0 0 25px var(--glow),
+        inset 0 0 20px rgba(0,0,0,0.8);
+    width: 100%;
+    max-width: 700px;
+    padding: 20px;
+}
+
+/* ---------- HEADERS ---------- */
+h1 {
+    text-align: center;
+    font-size: 26px;
+    letter-spacing: 2px;
+    margin-bottom: 8px;
+    text-shadow: 0 0 6px var(--glow);
+}
+
+h2 {
+    text-align: center;
+    font-size: 14px;
+    color: var(--muted);
+    letter-spacing: 2px;
+    margin-bottom: 20px;
+}
+
+/* ---------- SCREEN ---------- */
+.screen {
+    background: var(--screen);
+    border: 3px solid #333;
+    padding: 12px;
+    box-shadow: inset 0 0 15px rgba(0,0,0,0.9);
+}
+
+/* ---------- SLOTS ---------- */
+.slot {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: 2px solid #222;
+    padding: 14px 16px;
+    font-size: 18px;
+}
+
+.slot.locked {
+    border-color: var(--accent);
+    box-shadow: inset 0 0 10px rgba(255,61,129,0.5);
+}
+
+.slot-title {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ---------- BUTTONS ---------- */
+button {
+    font-family: inherit;
+    font-size: 12px;
+    padding: 10px 12px;
+    border: 2px solid #444;
+    background: #222;
+    color: var(--text);
+    cursor: pointer;
+    touch-action: manipulation;
+}
+
+button:hover {
+    border-color: var(--border);
+}
+
+.toggle-btn {
+    font-size: 11px;
+}
+
+/* ---------- CONTROLS ---------- */
+.controls {
+    display: flex;
+    gap: 10px;
+    margin-top: 16px;
+}
+
+.controls button {
+    flex: 1;
+    font-size: 14px;
+    padding: 12px;
+}
+
+.spin {
+    background: var(--border);
+    color: #000;
+    font-weight: bold;
+}
+
+.spin:hover {
+    background: #ffd966;
+}
+
+/* ---------- FOOTER ---------- */
+.hint {
+    text-align: center;
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 14px;
+}
+
+/* ---------- SLOT WRAPPER ---------- */
+.slot-wrapper {
+    margin-bottom: 10px;
+}
+
+.slot-wrapper:last-child .slot {
+    margin-bottom: 0;
+}
+
+.slot-wrapper .slot {
+    margin-bottom: 0;
+    cursor: default;
+}
+
+.slot-title {
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.slot-title:hover {
+    color: var(--border);
+}
+
+.slot-title.active {
+    color: var(--border);
+}
+
+/* ---------- INFO PANEL ---------- */
+.info-panel {
+    display: none;
+    background: #0a0a0a;
+    border: 2px solid #333;
+    border-top: none;
+    padding: 14px;
+    gap: 14px;
+}
+
+.info-panel.open {
+    display: flex;
+}
+
+.info-poster {
+    width: 80px;
+    min-width: 80px;
+    height: 120px;
+    object-fit: cover;
+    border: 2px solid #333;
+}
+
+.info-poster-placeholder {
+    width: 80px;
+    min-width: 80px;
+    height: 120px;
+    background: #1a1a1a;
+    border: 2px solid #333;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--muted);
+    font-size: 10px;
+    text-align: center;
+}
+
+.info-details {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 12px;
+    overflow: hidden;
+}
+
+.info-rating {
+    color: var(--border);
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.info-genre {
+    color: var(--muted);
+    font-size: 11px;
+    letter-spacing: 1px;
+}
+
+.info-plot {
+    color: var(--text);
+    font-size: 12px;
+    line-height: 1.5;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+}
+
+.info-loading {
+    color: var(--muted);
+    font-size: 12px;
+    padding: 10px 0;
+}
+
+.info-error {
+    color: var(--accent);
+    font-size: 12px;
+    padding: 10px 0;
+}
+
+/* ---------- DESKTOP SCALE ---------- */
+@media (min-width: 600px) {
+    h1 { font-size: 28px; }
+    .slot { font-size: 20px; }
+}
+</style>
+</head>
+
+<body>
+
+<div class="machine">
+    <h1>JUST PICK - MOVIE MACHINE</h1>
+    <h2>NOW PLAYING</h2>
+
+<div class="screen">
+    {% for i in range(3) %}
+        <div class="slot-wrapper">
+            <div class="slot {% if locked[i] %}locked{% endif %}">
+                <div class="slot-title" onclick="toggleInfo(this, '{{ slots[i] }}')">
+                    {{ slots[i] or "—" }}
+                </div>
+
+                <form method="post">
+                    {% if locked[i] %}
+                        <button class="toggle-btn" name="action" value="toggle{{ i }}">
+                            UNLOCK 🔓
+                        </button>
+                    {% else %}
+                        <button class="toggle-btn" name="action" value="toggle{{ i }}">
+                            LOCK 🔒
+                        </button>
+                    {% endif %}
+                </form>
+            </div>
+            <div class="info-panel" id="info-{{ i }}">
+                <div class="info-loading">LOADING...</div>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+
+
+    <form method="post" class="controls">
+      <button name="action" value="clear">CLEAR</button>
+      <button class="spin" name="action" value="spin">SPIN</button>
+    </form>
+
+
+    <div class="hint">
+        LOCKED SLOTS STAY • CLEAR TO REROLL • CLICK TITLE FOR INFO
+    </div>
+</div>
+
+<script>
+    const OMDB_API_KEY = "{{ omdb_api_key }}";
+    const cache = {};
+
+    function toggleInfo(titleEl, rawTitle) {
+        if (!rawTitle || rawTitle === "—") return;
+
+        const wrapper = titleEl.closest(".slot-wrapper");
+        const panel = wrapper.querySelector(".info-panel");
+        const isOpen = panel.classList.contains("open");
+
+        // Close all panels first
+        document.querySelectorAll(".info-panel").forEach(p => p.classList.remove("open"));
+        document.querySelectorAll(".slot-title").forEach(t => t.classList.remove("active"));
+
+        if (isOpen) return; // toggle off if already open
+
+        panel.classList.add("open");
+        titleEl.classList.add("active");
+        fetchMovieInfo(rawTitle, panel);
+    }
+
+    async function fetchMovieInfo(rawTitle, panel) {
+        // Strip year from title e.g. "Jaws (1975)" -> "Jaws", year -> "1975"
+        const match = rawTitle.match(/^(.+?)\s*\((\d{4})\)$/);
+        const title = match ? match[1].trim() : rawTitle;
+        const year = match ? match[2] : "";
+
+        const cacheKey = rawTitle;
+        if (cache[cacheKey]) {
+            renderInfo(cache[cacheKey], panel);
+            return;
+        }
+
+        panel.innerHTML = `<div class="info-loading">LOADING...</div>`;
+
+        try {
+            const params = new URLSearchParams({ apikey: OMDB_API_KEY, t: title, type: "movie" });
+            if (year) params.append("y", year);
+
+            const res = await fetch(`https://www.omdbapi.com/?${params}`);
+            const data = await res.json();
+
+            if (data.Response === "False") {
+                panel.innerHTML = `<div class="info-error">NO DATA FOUND</div>`;
+                return;
+            }
+
+            cache[cacheKey] = data;
+            renderInfo(data, panel);
+        } catch (e) {
+            panel.innerHTML = `<div class="info-error">FETCH ERROR</div>`;
+        }
+    }
+
+    function renderInfo(data, panel) {
+        const hasPoster = data.Poster && data.Poster !== "N/A";
+        const posterHTML = hasPoster
+            ? `<img class="info-poster" src="${data.Poster}" alt="Poster">`
+            : `<div class="info-poster-placeholder">NO POSTER</div>`;
+
+        const rating = data.imdbRating && data.imdbRating !== "N/A"
+            ? `<div class="info-rating">★ ${data.imdbRating} / 10</div>`
+            : "";
+
+        const genre = data.Genre && data.Genre !== "N/A"
+            ? `<div class="info-genre">${data.Genre.toUpperCase()}</div>`
+            : "";
+
+        const plot = data.Plot && data.Plot !== "N/A"
+            ? `<div class="info-plot">${data.Plot}</div>`
+            : "";
+
+        panel.innerHTML = `
+            ${posterHTML}
+            <div class="info-details">
+                ${rating}
+                ${genre}
+                ${plot}
+            </div>
+        `;
+    }
+</script>
+
+</body>
+</html>

@@ -1,8 +1,10 @@
 import random
+import os
 from flask import Flask, render_template, request, redirect, url_for
 
 FILE_PATH = "./movie_list.txt"
 SLOT_COUNT = 3
+OMDB_API_KEY = os.environ.get("OMDB_API_KEY", "")
 
 app = Flask(__name__)
 
@@ -63,7 +65,8 @@ def index():
     return render_template(
         "index.html",
         slots=slots,
-        locked=locked
+        locked=locked,
+        omdb_api_key=OMDB_API_KEY
     )
 
 
