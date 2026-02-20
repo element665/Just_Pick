@@ -1,6 +1,6 @@
 # Build a cross-platform Python image
 # Uses multi-platform support to work on amd64 and arm64 hosts
-FROM --platform=$BUILDPLATFORM python:3.11-slim
+FROM python:3.12-slim
 
 # Prevent Python from writing .pyc files
 ENV PYTHONDONTWRITEBYTECODE=1
