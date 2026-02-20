@@ -9,12 +9,11 @@ ENV PYTHONUNBUFFERED=1
 
 WORKDIR /movie-slot
 
-# Install dependencies first (better caching)
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-
 # Copy application code
 COPY . .
+
+# Install dependencies first (better caching)
+RUN pip install --no-cache-dir -r requirements.txt
 
 EXPOSE 5000
 
