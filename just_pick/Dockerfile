@@ -7,7 +7,7 @@ ENV PYTHONDONTWRITEBYTECODE=1
 # Ensure logs flush straight to stdout
 ENV PYTHONUNBUFFERED=1
 
-WORKDIR /movie-slot
+WORKDIR /just_pick
 
 # Copy application code
 COPY . .
@@ -17,4 +17,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 EXPOSE 5000
 
-CMD ["python", "flask_app.py"]
+CMD ["python", "just_pick.py"]
